@@ -32,6 +32,8 @@ public class AliPayCallbackController {
     @PostMapping("/alipay")
     public String aliPayNotify( @PathVariable("AppId") String appId, HttpServletRequest request) {
         paymentAssistService.initMchApp(appId);
-        return payCallbackService.callbackHandle(request);
+        String s = payCallbackService.callbackHandle(request);
+        return s;
+
     }
 }
