@@ -45,8 +45,9 @@ public class PayCallbackService {
      */
     public void payCallback() {
         var callbackInfo = PaymentContextLocal.get().getCallbackInfo();
-        // 加锁
+        //支付统一处理，加锁
         LockInfo lock = lockTemplate.lock("callback:payment:" + callbackInfo.getTradeNo(),10000, 200);
+
         if (Objects.isNull(lock)){
             callbackInfo.setCallbackStatus(CallbackStatusEnum.IGNORE).setCallbackErrorMsg("回调正在处理中，忽略本次回调请求");
             log.warn("订单号: {} 回调正在处理中，忽略本次回调请求", callbackInfo.getTradeNo());
@@ -122,11 +123,13 @@ public class PayCallbackService {
             callbackInfo.setCallbackStatus(CallbackStatusEnum.EXCEPTION).setCallbackErrorMsg("支付单状态非法,支付网关状态为失败,但支付单状态为已完成");
             return;
         }
+
         // 执行支付关闭的调整逻辑
         // 执行策略的关闭方法
         payOrder.setStatus(PayStatusEnum.CLOSE.getCode())
                 .setErrorMsg(callbackInfo.getTradeErrorMsg())
-                .setCloseTime(LocalDateTime.now());
+                .setCloseTime(LocalDateTime.now())
+                        .setStatus(PayStatusEnum.CLOSE.getCode());
         payOrderManager.updateById(payOrder);
         merchantNoticeService.registerPayNotice(payOrder);
     }

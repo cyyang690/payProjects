@@ -36,4 +36,10 @@ public class AliPayCallbackController {
         return s;
 
     }
+
+    @Operation(summary = "通知")
+    @PostMapping("")
+    public String aliPayAccount(HttpServletRequest request){
+        return payCallbackService.callbackHandle(request);
+    }
 }
